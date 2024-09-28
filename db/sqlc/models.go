@@ -5,17 +5,8 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 )
-
-type Account struct {
-	ID        string
-	Username  string
-	SavedID   sql.NullString
-	PostID    sql.NullString
-	CreatedAt time.Time
-}
 
 type Post struct {
 	ID          string
@@ -24,4 +15,18 @@ type Post struct {
 	Sold        bool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+type SavedPost struct {
+	UserID  string
+	PostID  string
+	SavedAt time.Time
+}
+
+type User struct {
+	ID        string
+	Username  string
+	Email     string
+	Password  string
+	CreatedAt time.Time
 }
