@@ -1,19 +1,28 @@
--- name: CreateUser :execresult
+-- name: CreateUser :exec
 INSERT INTO users(
-    username, email, password
-) VALUES (?, ?, ?);
+    id, username, email, password
+) VALUES (UUID(),?, ?, ?);
+
+-- name: RetrieveIdByEmail :one
+SELECT id FROM users
+WHERE email = ? LIMIT 1;
+
+-- name: RetrieveIdByUsername :one
+SELECT id FROM users
+WHERE username = ? LIMIT 1;
 
 -- name: ListUsers :many
 SELECT * FROM users 
-ORDER BY id;
+ORDER BY id 
+LIMIT ? OFFSET ?;
 
--- name: GetUser :one
+-- name: GetUserById :one
 SELECT * FROM users
 WHERE id = ? LIMIT 1;
 
--- name: UpdateUser :execresult
-UPDATE users SET username = ?, email = ?, password = ? 
+-- name: UpdateUser :exec
+UPDATE users SET username = ?, email = ?, password = ?
 WHERE id=?;
 
--- name: DeleteUser :execresult
+-- name: DeleteUser :exec
 DELETE FROM users WHERE id = ?;

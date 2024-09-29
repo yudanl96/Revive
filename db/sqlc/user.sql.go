@@ -7,13 +7,12 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
-const createUser = `-- name: CreateUser :execresult
+const createUser = `-- name: CreateUser :exec
 INSERT INTO users(
-    username, email, password
-) VALUES (?, ?, ?)
+    id, username, email, password
+) VALUES (UUID(),?, ?, ?)
 `
 
 type CreateUserParams struct {
@@ -22,25 +21,27 @@ type CreateUserParams struct {
 	Password string
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createUser, arg.Username, arg.Email, arg.Password)
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.ExecContext(ctx, createUser, arg.Username, arg.Email, arg.Password)
+	return err
 }
 
-const deleteUser = `-- name: DeleteUser :execresult
+const deleteUser = `-- name: DeleteUser :exec
 DELETE FROM users WHERE id = ?
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id string) (sql.Result, error) {
-	return q.db.ExecContext(ctx, deleteUser, id)
+func (q *Queries) DeleteUser(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteUser, id)
+	return err
 }
 
-const getUser = `-- name: GetUser :one
+const getUserById = `-- name: GetUserById :one
 SELECT id, username, email, password, created_at FROM users
 WHERE id = ? LIMIT 1
 `
 
-func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUser, id)
+func (q *Queries) GetUserById(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserById, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -54,11 +55,17 @@ func (q *Queries) GetUser(ctx context.Context, id string) (User, error) {
 
 const listUsers = `-- name: ListUsers :many
 SELECT id, username, email, password, created_at FROM users 
-ORDER BY id
+ORDER BY id 
+LIMIT ? OFFSET ?
 `
 
-func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, listUsers)
+type ListUsersParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, listUsers, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -86,8 +93,32 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
-const updateUser = `-- name: UpdateUser :execresult
-UPDATE users SET username = ?, email = ?, password = ? 
+const retrieveIdByEmail = `-- name: RetrieveIdByEmail :one
+SELECT id FROM users
+WHERE email = ? LIMIT 1
+`
+
+func (q *Queries) RetrieveIdByEmail(ctx context.Context, email string) (string, error) {
+	row := q.db.QueryRowContext(ctx, retrieveIdByEmail, email)
+	var id string
+	err := row.Scan(&id)
+	return id, err
+}
+
+const retrieveIdByUsername = `-- name: RetrieveIdByUsername :one
+SELECT id FROM users
+WHERE username = ? LIMIT 1
+`
+
+func (q *Queries) RetrieveIdByUsername(ctx context.Context, username string) (string, error) {
+	row := q.db.QueryRowContext(ctx, retrieveIdByUsername, username)
+	var id string
+	err := row.Scan(&id)
+	return id, err
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users SET username = ?, email = ?, password = ?
 WHERE id=?
 `
 
@@ -98,11 +129,12 @@ type UpdateUserParams struct {
 	ID       string
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updateUser,
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.ExecContext(ctx, updateUser,
 		arg.Username,
 		arg.Email,
 		arg.Password,
 		arg.ID,
 	)
+	return err
 }

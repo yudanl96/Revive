@@ -12,17 +12,18 @@ import (
 
 const createPost = `-- name: CreatePost :execresult
 INSERT INTO posts(
-    user_id, description
-) VALUES (?, ?)
+    user_id, description, price
+) VALUES (?, ?, ?)
 `
 
 type CreatePostParams struct {
 	UserID      string
 	Description string
+	Price       int32
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createPost, arg.UserID, arg.Description)
+	return q.db.ExecContext(ctx, createPost, arg.UserID, arg.Description, arg.Price)
 }
 
 const deletePost = `-- name: DeletePost :execresult
@@ -34,7 +35,7 @@ func (q *Queries) DeletePost(ctx context.Context, id string) (sql.Result, error)
 }
 
 const getPost = `-- name: GetPost :one
-SELECT id, user_id, description, sold, created_at, updated_at FROM posts
+SELECT id, user_id, description, price, sold, created_at, updated_at FROM posts
 WHERE id = ? LIMIT 1
 `
 
@@ -45,6 +46,7 @@ func (q *Queries) GetPost(ctx context.Context, id string) (Post, error) {
 		&i.ID,
 		&i.UserID,
 		&i.Description,
+		&i.Price,
 		&i.Sold,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -53,7 +55,7 @@ func (q *Queries) GetPost(ctx context.Context, id string) (Post, error) {
 }
 
 const listPosts = `-- name: ListPosts :many
-SELECT id, user_id, description, sold, created_at, updated_at FROM posts
+SELECT id, user_id, description, price, sold, created_at, updated_at FROM posts
 ORDER BY updated_at
 `
 
@@ -70,6 +72,7 @@ func (q *Queries) ListPosts(ctx context.Context) ([]Post, error) {
 			&i.ID,
 			&i.UserID,
 			&i.Description,
+			&i.Price,
 			&i.Sold,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -88,15 +91,22 @@ func (q *Queries) ListPosts(ctx context.Context) ([]Post, error) {
 }
 
 const updatePost = `-- name: UpdatePost :execresult
-UPDATE posts SET description = ?
+UPDATE posts SET description = ?, price = ?, sold = ?
 WHERE id=?
 `
 
 type UpdatePostParams struct {
 	Description string
+	Price       int32
+	Sold        bool
 	ID          string
 }
 
 func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updatePost, arg.Description, arg.ID)
+	return q.db.ExecContext(ctx, updatePost,
+		arg.Description,
+		arg.Price,
+		arg.Sold,
+		arg.ID,
+	)
 }

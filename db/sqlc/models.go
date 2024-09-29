@@ -12,6 +12,7 @@ type Post struct {
 	ID          string
 	UserID      string
 	Description string
+	Price       int32
 	Sold        bool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
