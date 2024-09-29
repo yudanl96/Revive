@@ -1,20 +1,21 @@
--- name: CreatePost :execresult
+-- name: CreatePost :exec
 INSERT INTO posts(
-    user_id, description, price
-) VALUES (?, ?, ?);
+    id, user_id, description, price
+) VALUES (?, ?, ?, ?);
 
 -- name: ListPosts :many
 SELECT * FROM posts
-ORDER BY updated_at;
+ORDER BY updated_at
+LIMIT ? OFFSET ?;
 
--- name: GetPost :one
+-- name: GetPostById :one
 SELECT * FROM posts
 WHERE id = ? LIMIT 1;
 
--- name: UpdatePost :execresult
+-- name: UpdatePost :exec
 UPDATE posts SET description = ?, price = ?, sold = ?
 WHERE id=?;
 
--- name: DeletePost :execresult
+-- name: DeletePost :exec
 DELETE FROM posts WHERE id = ?;
 

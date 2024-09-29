@@ -11,6 +11,6 @@ sqlc:
 	./sqlc generate
 
 test:
-	go test -v -cover ./...
+	go test -v -cover -count=1 ./...
 
 .PHONY: openmysql migrateup migratedown sqlc test

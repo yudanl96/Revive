@@ -1,4 +1,4 @@
--- name: CreateSavedPost :execresult
+-- name: CreateSavedPost :exec
 INSERT INTO saved_posts(
     user_id, post_id
 ) VALUES (?, ?);
@@ -8,20 +8,15 @@ SELECT * FROM saved_posts
 WHERE user_id = ?
 ORDER BY saved_at DESC;
 
--- name: ListSavedPostsByPost :many
+-- name: CountSavedPostsByPost :one
+SELECT COUNT(*) FROM saved_posts
+WHERE post_id = ?;
+
+-- name: GetSavedPostByIds :one
 SELECT * FROM saved_posts
-WHERE post_id = ?
-ORDER BY saved_at DESC;
-
--- name: GetSavedPostByUser :many
-SELECT * FROM saved_posts
-WHERE user_id = ? LIMIT ? OFFSET ?;
-
--- name: GetSavedPostByPost :many
-SELECT * FROM saved_posts
-WHERE post_id = ? LIMIT ? OFFSET ?;
+WHERE user_id = ? AND post_id = ? LIMIT 1;
 
 
--- name: DeleteSavedPost :execresult
+-- name: DeleteSavedPost :exec
 DELETE FROM saved_posts 
 WHERE user_id = ? AND post_id = ?;

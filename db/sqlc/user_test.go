@@ -5,19 +5,22 @@ import (
 	"database/sql"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/yudanl96/revive/util"
 )
 
-func createRandomUser(t *testing.T) CreateUserParams {
-	password := util.RandomStrLen()
-	username := util.RandomStrLen()
-	email := util.RandomStrLen() + "@gmail.com"
+func CreateRandomUser(t *testing.T) CreateUserParams {
+	id := uuid.New().String()
+	password := util.RandomShortStr()
+	username := util.RandomShortStr()
+	email := util.RandomShortStr() + "@gmail.com"
 	hashedPW := util.HashPassword(password)
 	err := util.MatchPassword(hashedPW, password)
 	require.NoError(t, err)
 
 	arg := CreateUserParams{
+		ID:       id,
 		Username: username,
 		Email:    email,
 		Password: string(hashedPW),
@@ -29,50 +32,47 @@ func createRandomUser(t *testing.T) CreateUserParams {
 }
 
 func TestCreateUser(t *testing.T) {
-	createRandomUser(t)
+	CreateRandomUser(t)
 }
 
 func TestRetrieveIdByEmail(t *testing.T) {
-	arg := createRandomUser(t)
+	arg := CreateRandomUser(t)
 	id, err := testQueries.RetrieveIdByEmail(context.Background(), arg.Email)
 	require.NoError(t, err)
 	require.NotEmpty(t, id)
+	require.Equal(t, arg.ID, id)
 }
 
 func TestRetrieveIdByUsername(t *testing.T) {
-	arg := createRandomUser(t)
+	arg := CreateRandomUser(t)
 	id, err := testQueries.RetrieveIdByUsername(context.Background(), arg.Username)
 	require.NoError(t, err)
 	require.NotEmpty(t, id)
+	require.Equal(t, arg.ID, id)
 }
 
 func TestGetUserById(t *testing.T) {
-	arg := createRandomUser(t)
-	id, err := testQueries.RetrieveIdByEmail(context.Background(), arg.Email)
-	require.NoError(t, err)
-	require.NotEmpty(t, id)
-	user, err := testQueries.GetUserById(context.Background(), id)
+	arg := CreateRandomUser(t)
+	user, err := testQueries.GetUserById(context.Background(), arg.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
+	require.Equal(t, arg.ID, user.ID)
 	require.Equal(t, arg.Email, user.Email)
 	require.Equal(t, arg.Username, user.Username)
 	require.Equal(t, arg.Password, user.Password)
 }
 
 func TestUpdateUser(t *testing.T) {
-	arg := createRandomUser(t)
-	id, err := testQueries.RetrieveIdByEmail(context.Background(), arg.Email)
-	require.NoError(t, err)
-	require.NotEmpty(t, id)
+	arg := CreateRandomUser(t)
 	arg_update := UpdateUserParams{
-		Username: util.RandomStrLen(),
-		Email:    util.RandomStrLen(),
+		Username: util.RandomShortStr(),
+		Email:    util.RandomShortStr(),
 		Password: arg.Password,
-		ID:       id,
+		ID:       arg.ID,
 	}
-	err = testQueries.UpdateUser(context.Background(), arg_update)
+	err := testQueries.UpdateUser(context.Background(), arg_update)
 	require.NoError(t, err)
-	user, err := testQueries.GetUserById(context.Background(), id)
+	user, err := testQueries.GetUserById(context.Background(), arg.ID)
 	require.NoError(t, err)
 	require.Equal(t, arg_update.Email, user.Email)
 	require.Equal(t, arg_update.Username, user.Username)
@@ -80,22 +80,19 @@ func TestUpdateUser(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	arg := createRandomUser(t)
-	id, err := testQueries.RetrieveIdByEmail(context.Background(), arg.Email)
-	require.NoError(t, err)
-	require.NotEmpty(t, id)
+	arg := CreateRandomUser(t)
 
-	err = testQueries.DeleteUser(context.Background(), id)
+	err := testQueries.DeleteUser(context.Background(), arg.ID)
 	require.NoError(t, err)
 
-	user, err := testQueries.GetUserById(context.Background(), id)
+	user, err := testQueries.GetUserById(context.Background(), arg.ID)
 	require.EqualError(t, err, sql.ErrNoRows.Error())
 	require.Empty(t, user)
 }
 
 func TestListUsers(t *testing.T) {
 	for i := 0; i < 10; i++ {
-		createRandomUser(t)
+		CreateRandomUser(t)
 	}
 
 	arg := ListUsersParams{
@@ -107,7 +104,7 @@ func TestListUsers(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, users, 3)
 
-	for _, account := range users {
-		require.NotEmpty(t, account)
+	for _, user := range users {
+		require.NotEmpty(t, user)
 	}
 }

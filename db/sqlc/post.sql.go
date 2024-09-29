@@ -7,40 +7,47 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
-const createPost = `-- name: CreatePost :execresult
+const createPost = `-- name: CreatePost :exec
 INSERT INTO posts(
-    user_id, description, price
-) VALUES (?, ?, ?)
+    id, user_id, description, price
+) VALUES (?, ?, ?, ?)
 `
 
 type CreatePostParams struct {
+	ID          string
 	UserID      string
 	Description string
 	Price       int32
 }
 
-func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createPost, arg.UserID, arg.Description, arg.Price)
+func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
+	_, err := q.db.ExecContext(ctx, createPost,
+		arg.ID,
+		arg.UserID,
+		arg.Description,
+		arg.Price,
+	)
+	return err
 }
 
-const deletePost = `-- name: DeletePost :execresult
+const deletePost = `-- name: DeletePost :exec
 DELETE FROM posts WHERE id = ?
 `
 
-func (q *Queries) DeletePost(ctx context.Context, id string) (sql.Result, error) {
-	return q.db.ExecContext(ctx, deletePost, id)
+func (q *Queries) DeletePost(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deletePost, id)
+	return err
 }
 
-const getPost = `-- name: GetPost :one
+const getPostById = `-- name: GetPostById :one
 SELECT id, user_id, description, price, sold, created_at, updated_at FROM posts
 WHERE id = ? LIMIT 1
 `
 
-func (q *Queries) GetPost(ctx context.Context, id string) (Post, error) {
-	row := q.db.QueryRowContext(ctx, getPost, id)
+func (q *Queries) GetPostById(ctx context.Context, id string) (Post, error) {
+	row := q.db.QueryRowContext(ctx, getPostById, id)
 	var i Post
 	err := row.Scan(
 		&i.ID,
@@ -57,10 +64,16 @@ func (q *Queries) GetPost(ctx context.Context, id string) (Post, error) {
 const listPosts = `-- name: ListPosts :many
 SELECT id, user_id, description, price, sold, created_at, updated_at FROM posts
 ORDER BY updated_at
+LIMIT ? OFFSET ?
 `
 
-func (q *Queries) ListPosts(ctx context.Context) ([]Post, error) {
-	rows, err := q.db.QueryContext(ctx, listPosts)
+type ListPostsParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) ListPosts(ctx context.Context, arg ListPostsParams) ([]Post, error) {
+	rows, err := q.db.QueryContext(ctx, listPosts, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +103,7 @@ func (q *Queries) ListPosts(ctx context.Context) ([]Post, error) {
 	return items, nil
 }
 
-const updatePost = `-- name: UpdatePost :execresult
+const updatePost = `-- name: UpdatePost :exec
 UPDATE posts SET description = ?, price = ?, sold = ?
 WHERE id=?
 `
@@ -102,11 +115,12 @@ type UpdatePostParams struct {
 	ID          string
 }
 
-func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updatePost,
+func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) error {
+	_, err := q.db.ExecContext(ctx, updatePost,
 		arg.Description,
 		arg.Price,
 		arg.Sold,
 		arg.ID,
 	)
+	return err
 }

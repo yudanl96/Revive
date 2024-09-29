@@ -7,10 +7,21 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
-const createSavedPost = `-- name: CreateSavedPost :execresult
+const countSavedPostsByPost = `-- name: CountSavedPostsByPost :one
+SELECT COUNT(*) FROM saved_posts
+WHERE post_id = ?
+`
+
+func (q *Queries) CountSavedPostsByPost(ctx context.Context, postID string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countSavedPostsByPost, postID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const createSavedPost = `-- name: CreateSavedPost :exec
 INSERT INTO saved_posts(
     user_id, post_id
 ) VALUES (?, ?)
@@ -21,11 +32,12 @@ type CreateSavedPostParams struct {
 	PostID string
 }
 
-func (q *Queries) CreateSavedPost(ctx context.Context, arg CreateSavedPostParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createSavedPost, arg.UserID, arg.PostID)
+func (q *Queries) CreateSavedPost(ctx context.Context, arg CreateSavedPostParams) error {
+	_, err := q.db.ExecContext(ctx, createSavedPost, arg.UserID, arg.PostID)
+	return err
 }
 
-const deleteSavedPost = `-- name: DeleteSavedPost :execresult
+const deleteSavedPost = `-- name: DeleteSavedPost :exec
 DELETE FROM saved_posts 
 WHERE user_id = ? AND post_id = ?
 `
@@ -35,105 +47,26 @@ type DeleteSavedPostParams struct {
 	PostID string
 }
 
-func (q *Queries) DeleteSavedPost(ctx context.Context, arg DeleteSavedPostParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, deleteSavedPost, arg.UserID, arg.PostID)
+func (q *Queries) DeleteSavedPost(ctx context.Context, arg DeleteSavedPostParams) error {
+	_, err := q.db.ExecContext(ctx, deleteSavedPost, arg.UserID, arg.PostID)
+	return err
 }
 
-const getSavedPostByPost = `-- name: GetSavedPostByPost :many
+const getSavedPostByIds = `-- name: GetSavedPostByIds :one
 SELECT user_id, post_id, saved_at FROM saved_posts
-WHERE post_id = ? LIMIT ? OFFSET ?
+WHERE user_id = ? AND post_id = ? LIMIT 1
 `
 
-type GetSavedPostByPostParams struct {
-	PostID string
-	Limit  int32
-	Offset int32
-}
-
-func (q *Queries) GetSavedPostByPost(ctx context.Context, arg GetSavedPostByPostParams) ([]SavedPost, error) {
-	rows, err := q.db.QueryContext(ctx, getSavedPostByPost, arg.PostID, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []SavedPost
-	for rows.Next() {
-		var i SavedPost
-		if err := rows.Scan(&i.UserID, &i.PostID, &i.SavedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getSavedPostByUser = `-- name: GetSavedPostByUser :many
-SELECT user_id, post_id, saved_at FROM saved_posts
-WHERE user_id = ? LIMIT ? OFFSET ?
-`
-
-type GetSavedPostByUserParams struct {
+type GetSavedPostByIdsParams struct {
 	UserID string
-	Limit  int32
-	Offset int32
+	PostID string
 }
 
-func (q *Queries) GetSavedPostByUser(ctx context.Context, arg GetSavedPostByUserParams) ([]SavedPost, error) {
-	rows, err := q.db.QueryContext(ctx, getSavedPostByUser, arg.UserID, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []SavedPost
-	for rows.Next() {
-		var i SavedPost
-		if err := rows.Scan(&i.UserID, &i.PostID, &i.SavedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listSavedPostsByPost = `-- name: ListSavedPostsByPost :many
-SELECT user_id, post_id, saved_at FROM saved_posts
-WHERE post_id = ?
-ORDER BY saved_at DESC
-`
-
-func (q *Queries) ListSavedPostsByPost(ctx context.Context, postID string) ([]SavedPost, error) {
-	rows, err := q.db.QueryContext(ctx, listSavedPostsByPost, postID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []SavedPost
-	for rows.Next() {
-		var i SavedPost
-		if err := rows.Scan(&i.UserID, &i.PostID, &i.SavedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) GetSavedPostByIds(ctx context.Context, arg GetSavedPostByIdsParams) (SavedPost, error) {
+	row := q.db.QueryRowContext(ctx, getSavedPostByIds, arg.UserID, arg.PostID)
+	var i SavedPost
+	err := row.Scan(&i.UserID, &i.PostID, &i.SavedAt)
+	return i, err
 }
 
 const listSavedPostsByUser = `-- name: ListSavedPostsByUser :many

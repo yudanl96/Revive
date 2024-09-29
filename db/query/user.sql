@@ -1,7 +1,7 @@
 -- name: CreateUser :exec
 INSERT INTO users(
     id, username, email, password
-) VALUES (UUID(),?, ?, ?);
+) VALUES (?, ?, ?, ?);
 
 -- name: RetrieveIdByEmail :one
 SELECT id FROM users

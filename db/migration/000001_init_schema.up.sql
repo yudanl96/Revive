@@ -1,5 +1,5 @@
 CREATE TABLE users (
-  id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()), 
+  id VARCHAR(36) NOT NULL PRIMARY KEY, 
   username VARCHAR(255) UNIQUE NOT NULL,
   email VARCHAR(255) UNIQUE  NOT NULL,
   password VARCHAR(255) NOT NULL,
@@ -7,8 +7,8 @@ CREATE TABLE users (
 );
 
 CREATE TABLE posts (
-  id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()), 
-  user_id VARCHAR(36) NOT NULL,
+  id VARCHAR(36) NOT NULL PRIMARY KEY,  
+  user_id VARCHAR(36) NOT NULL, 
   description VARCHAR(255) NOT NULL,
   price INT DEFAULT 0 NOT NULL,
   sold boolean DEFAULT 0 NOT NULL,  -- Use 0 (false) instead of 'False'
