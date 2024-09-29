@@ -7,18 +7,19 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/yudanl96/revive/util"
 	//need _ because we are not explicitly using it
-)
-
-const (
-	dbDriver = "mysql"
-	dbSource = "root:secret@tcp(127.0.0.1:3306)/revive?parseTime=true"
 )
 
 var testQueries *Queries
 
 func TestMain(m *testing.M) {
-	connect, err := sql.Open(dbDriver, dbSource)
+	config, err := util.LoadConfig("../..")
+	if err != nil {
+		log.Fatal("Unable to load configuration: ", err)
+	}
+
+	connect, err := sql.Open(config.DBDriver, config.DBSourse)
 	if err != nil {
 		log.Fatal("Cannot connect to database:", err)
 	}

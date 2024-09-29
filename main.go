@@ -2,21 +2,23 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/yudanl96/revive/api"
 	db "github.com/yudanl96/revive/db/sqlc"
-)
-
-const (
-	dbDriver      = "mysql"
-	dbSource      = "root:secret@tcp(127.0.0.1:3306)/revive?parseTime=true"
-	serverAddress = "0.0.0.0:8080"
+	"github.com/yudanl96/revive/util"
 )
 
 func main() {
-	connect, err := sql.Open(dbDriver, dbSource)
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("Unable to load configuration: ", err)
+	}
+	fmt.Println(config.DBDriver, config.DBSourse, config.ServerAddress)
+	connect, err := sql.Open(config.DBDriver, config.DBSourse)
+
 	if err != nil {
 		log.Fatal("Cannot connect to database:", err)
 	}
@@ -24,7 +26,7 @@ func main() {
 	store := db.NewStore(connect)
 	server := api.NewServer(store)
 
-	err = server.Start(serverAddress)
+	err = server.Start(config.ServerAddress)
 	if err != nil {
 		log.Fatal("Failed to connect to server: ", err)
 	}

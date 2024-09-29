@@ -57,7 +57,7 @@ func (server *Server) getUserByUsername(ctx *gin.Context) {
 	id, err := server.store.RetrieveIdByUsername(ctx, request.Username)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusBadRequest, errorResponse(err))
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -67,7 +67,7 @@ func (server *Server) getUserByUsername(ctx *gin.Context) {
 	user, err := server.store.GetUserById(ctx, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusBadRequest, errorResponse(err))
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))

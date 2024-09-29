@@ -10,3 +10,4 @@ sql:
         sql_driver: "github.com/go-sql-driver/mysql"
         out: "db/sqlc"
         emit_empty_slices: true
+        emit_interface: true

@@ -11,10 +11,13 @@ sqlc:
 	./sqlc generate
 
 test:
-	go test -v -cover -count=1 ./...
+	go test -v -cover ./...
 
 server:
 	go run main.go
 
+mock:
+	mockgen -package mockDB -destination db/mock/store.go github.com/yudanl96/revive/db/sqlc Store
 
-.PHONY: openmysql migrateup migratedown sqlc test server
+
+.PHONY: openmysql migrateup migratedown sqlc test server mock

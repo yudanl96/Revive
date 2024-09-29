@@ -6,22 +6,26 @@ import (
 	"fmt"
 )
 
-// extend to include transactions, composition is preferred than inheritance
-type Store struct {
+type Store interface {
+	Querier
+}
+
+// extend to include transactions in sql database
+type SQLStore struct {
 	*Queries
 	db *sql.DB //create db transaction
 }
 
 // new instance
-func NewStore(db *sql.DB) *Store {
-	return &Store{
+func NewStore(db *sql.DB) Store {
+	return &SQLStore{
 		db:      db,
 		Queries: New(db),
 	}
 }
 
 // execute a function
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := store.db.BeginTx(ctx, nil) //using default isolation level
 	if err != nil {
 		return err
