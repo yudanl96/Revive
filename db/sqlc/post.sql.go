@@ -63,7 +63,7 @@ func (q *Queries) GetPostById(ctx context.Context, id string) (Post, error) {
 
 const listPosts = `-- name: ListPosts :many
 SELECT id, user_id, description, price, sold, created_at, updated_at FROM posts
-ORDER BY updated_at
+ORDER BY updated_at DESC, id ASC
 LIMIT ? OFFSET ?
 `
 
@@ -78,7 +78,7 @@ func (q *Queries) ListPosts(ctx context.Context, arg ListPostsParams) ([]Post, e
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Post
+	items := []Post{}
 	for rows.Next() {
 		var i Post
 		if err := rows.Scan(

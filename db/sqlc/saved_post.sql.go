@@ -81,7 +81,7 @@ func (q *Queries) ListSavedPostsByUser(ctx context.Context, userID string) ([]Sa
 		return nil, err
 	}
 	defer rows.Close()
-	var items []SavedPost
+	items := []SavedPost{}
 	for rows.Next() {
 		var i SavedPost
 		if err := rows.Scan(&i.UserID, &i.PostID, &i.SavedAt); err != nil {

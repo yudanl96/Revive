@@ -5,7 +5,7 @@ INSERT INTO posts(
 
 -- name: ListPosts :many
 SELECT * FROM posts
-ORDER BY updated_at
+ORDER BY updated_at DESC, id ASC
 LIMIT ? OFFSET ?;
 
 -- name: GetPostById :one

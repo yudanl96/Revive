@@ -13,4 +13,8 @@ sqlc:
 test:
 	go test -v -cover -count=1 ./...
 
-.PHONY: openmysql migrateup migratedown sqlc test
+server:
+	go run main.go
+
+
+.PHONY: openmysql migrateup migratedown sqlc test server
