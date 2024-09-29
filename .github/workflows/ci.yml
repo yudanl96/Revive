@@ -24,7 +24,11 @@ jobs:
 
     - name: Setup MySQL
       uses: mirromutth/mysql-action@v1.1
-            
+      with:
+        host port: 3306 # Optional, default value is 3306. The port of host
+        mysql database: 'revive?parseTime=true' # Optional, default value is "test". The specified database which will be create
+        mysql root password: 'secret' # Required if "mysql user" is empty, default is empty. The root superuser password
+         
     - name: Build
       run: go build -v ./...
 
