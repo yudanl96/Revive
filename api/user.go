@@ -22,7 +22,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 	arg := db.CreateUserParams{
-		ID:       uuid.New().String(),
+		ID:       uuid.NewString(),
 		Password: request.Password,
 		Email:    request.Email,
 		Username: request.Username,
