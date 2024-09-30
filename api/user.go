@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -13,6 +14,13 @@ type createUserRequest struct {
 	Username string `json:"username" binding:"required,alphanum,min=5,max=15"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,alphanum,min=8,max=30"`
+}
+
+type userResponse struct {
+	ID        string
+	Username  string
+	Email     string
+	CreatedAt time.Time
 }
 
 func (server *Server) createUser(ctx *gin.Context) {
@@ -40,7 +48,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	ctx.JSON(http.StatusOK, user) // need to modify -- not passing passwords around
 }
 
 type getUserByUsernameRequest struct {
@@ -74,6 +82,15 @@ func (server *Server) getUserByUsername(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	ctx.JSON(http.StatusOK, user) // need to modify -- not passing passwords around
+}
 
+type loginUserRequest struct {
+	Username string `json:"username" binding:"required,alphanum,min=5,max=15"`
+	Password string `json:"password" binding:"required,alphanum,min=8,max=30"`
+}
+
+type loginUserResponse struct {
+	Token string  `json:"access_token"`
+	User  db.User `json:"user"`
 }

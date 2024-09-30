@@ -1,19 +1,33 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	db "github.com/yudanl96/revive/db/sqlc"
+	"github.com/yudanl96/revive/token"
+	"github.com/yudanl96/revive/util"
 )
 
 // serve HTTP requests
 type Server struct {
-	store  db.Store
-	router *gin.Engine
+	store      db.Store
+	router     *gin.Engine
+	tokenMaker token.Maker
+	config     util.Config
 }
 
 // creates a new HTTP server and setup routing
-func NewServer(store db.Store) *Server {
-	server := &Server{store: store}
+func NewServer(config util.Config, store db.Store) (*Server, error) {
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("fail to create token maker: %w", err)
+	}
+	server := &Server{
+		config:     config,
+		store:      store,
+		tokenMaker: tokenMaker,
+	}
 	router := gin.Default()
 
 	router.POST("/users", server.createUser)
@@ -22,7 +36,7 @@ func NewServer(store db.Store) *Server {
 	router.POST("/posts", server.createPost)
 
 	server.router = router
-	return server
+	return server, nil
 }
 
 // start the http server on address

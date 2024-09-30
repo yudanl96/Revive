@@ -142,7 +142,7 @@ func TestGetUserByUsernameAPI(t *testing.T) {
 			test_cur.buildStubs(store)
 
 			// start test server and send request
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			url := fmt.Sprintf("/users/%v", test_cur.username)
