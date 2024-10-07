@@ -10,8 +10,9 @@ import (
 // read by viper
 type Config struct {
 	DBDriver          string        `mapstructure:"DB_DRIVER"`
-	DBSourse          string        `mapstructure:"DB_SOURSE"`
-	ServerAddress     string        `mapstructure:"SERVER_ADDRESS"`
+	DBSource          string        `mapstructure:"DB_SOURCE"`
+	HTTPServerAddress string        `mapstructure:"HTTP_SERVER_ADDRESS"`
+	GRPCServerAddress string        `mapstructure:"GRPC_SERVER_ADDRESS"`
 	TokenSymmetricKey string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	TokenDuration     time.Duration `mapstructure:"TOKEN_DURATION"`
 }
