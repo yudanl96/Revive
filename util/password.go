@@ -1,17 +1,12 @@
 package util
 
 import (
-	"log"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
-func HashPassword(password string) string {
+func HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Fatal("Cannot hash password:", err)
-	}
-	return string(hashedPassword)
+	return string(hashedPassword), err
 }
 
 func MatchPassword(hashedPW, password string) error {

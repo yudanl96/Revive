@@ -1,15 +1,20 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"log"
 	"net"
+	"net/http"
+	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/yudanl96/revive/api"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/redis/go-redis/v9"
 	db "github.com/yudanl96/revive/db/sqlc"
 	"github.com/yudanl96/revive/gapi"
 	"github.com/yudanl96/revive/pb"
+	"github.com/yudanl96/revive/redisdb"
 	"github.com/yudanl96/revive/util"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -21,29 +26,52 @@ func main() {
 		log.Fatal("Unable to load configuration: ", err)
 	}
 
+	var wg sync.WaitGroup
+	client, err := startRedisServer(config, &wg)
+	if err != nil {
+		log.Fatal("Failed to create Redis server: ", err)
+	}
+	//make sure redis is initialized before continuing
+	wg.Wait()
+
+	r := redisdb.RedisRepo{
+		Client: client,
+	}
+
 	connect, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal("Cannot connect to database:", err)
 	}
 
 	store := db.NewStore(connect)
-	startGrpcServer(config, store)
+
+	go startGWServer(config, store, &r)
+	startGrpcServer(config, store, &r)
 }
 
-func startGinServer(config util.Config, store db.Store) {
-	server, err := api.NewServer(config, store)
+func startRedisServer(config util.Config, wg *sync.WaitGroup) (*redis.Client, error) {
+	wg.Add(1)
+	defer wg.Done() // Notify that the Redis server setup is complete
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr: config.RedisServerAddress,
+	})
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	err := rdb.Ping(ctx).Err()
 	if err != nil {
-		log.Fatal("Failed to create server: ", err)
+		log.Fatal("Failed to connect to redis: ", err)
+		return nil, err
 	}
 
-	err = server.Start(config.HTTPServerAddress)
-	if err != nil {
-		log.Fatal("Failed to connect to server: ", err)
-	}
+	log.Printf("start redis server at %s", rdb.Options().Addr)
+	return rdb, nil
 }
 
-func startGrpcServer(config util.Config, store db.Store) {
-	server, err := gapi.NewServer(config, store)
+func startGrpcServer(config util.Config, store db.Store, r *redisdb.RedisRepo) {
+	server, err := gapi.NewServer(config, store, r)
 	if err != nil {
 		log.Fatal("Failed to create server: ", err)
 	}
@@ -62,3 +90,47 @@ func startGrpcServer(config util.Config, store db.Store) {
 		log.Fatal("Failed to start grpc server: ", err)
 	}
 }
+
+func startGWServer(config util.Config, store db.Store, r *redisdb.RedisRepo) {
+	server, err := gapi.NewServer(config, store, r)
+	if err != nil {
+		log.Fatal("Failed to create server: ", err)
+	}
+
+	grpcMux := runtime.NewServeMux()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel() //will be executed before exiting function
+	//prevent system doing unnesseary work
+
+	err = pb.RegisterReviveHandlerServer(ctx, grpcMux, server)
+	if err != nil {
+		log.Fatal("Failed to register handler server: ", err)
+	}
+
+	mux := http.NewServeMux() //receive http requests from clients
+	mux.Handle("/", grpcMux)
+
+	listener, err := net.Listen("tcp", config.HTTPServerAddress)
+	if err != nil {
+		log.Fatal("Failed to create lisenter: ", err)
+	}
+
+	log.Printf("start HTTP gateway server at %s", listener.Addr().String())
+	err = http.Serve(listener, mux)
+	if err != nil {
+		log.Fatal("Failed to start HTTP gateway server: ", err)
+	}
+}
+
+// func startGinServer(config util.Config, store db.Store) {
+// 	server, err := api.NewServer(config, store)
+// 	if err != nil {
+// 		log.Fatal("Failed to create server: ", err)
+// 	}
+
+// 	err = server.Start(config.HTTPServerAddress)
+// 	if err != nil {
+// 		log.Fatal("Failed to connect to server: ", err)
+// 	}
+// }

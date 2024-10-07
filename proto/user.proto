@@ -9,6 +9,7 @@ option go_package = "github.com/yudanl96/revive/pb";
 message User{
     string username = 1; //1 is field number, identifier
     string email = 2; //1-15 one bit
-    google.protobuf.Timestamp created_at = 3;
+    string id = 3;
+    google.protobuf.Timestamp created_at = 4;
 }
 

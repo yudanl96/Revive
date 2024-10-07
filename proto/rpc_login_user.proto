@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package pb;
+
+import "user.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/yudanl96/revive/pb";
+
+message LoginUserRequest{
+    string username = 1; 
+    string password = 2;
+}
+
+message LoginUserResponse{
+    User user = 1;
+    string token = 2;
+    string session_id = 3;
+    string refresh_token = 4;
+    google.protobuf.Timestamp token_expires_time = 5;
+    google.protobuf.Timestamp refresh_token_expires_time = 6;
+}
+
+
+

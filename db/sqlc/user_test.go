@@ -15,18 +15,15 @@ func CreateRandomUser(t *testing.T) CreateUserParams {
 	password := util.RandomShortStr()
 	username := util.RandomShortStr()
 	email := util.RandomShortStr() + "@gmail.com"
-	hashedPW := util.HashPassword(password)
-	err := util.MatchPassword(hashedPW, password)
-	require.NoError(t, err)
 
 	arg := CreateUserParams{
 		ID:       id,
 		Username: username,
 		Email:    email,
-		Password: string(hashedPW),
+		Password: password,
 	}
 
-	err = testQueries.CreateUser(context.Background(), arg)
+	err := testQueries.CreateUser(context.Background(), arg)
 	require.NoError(t, err)
 	return arg
 }
