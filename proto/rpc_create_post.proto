@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package pb;
+
+import "post.proto";
+
+option go_package = "github.com/yudanl96/revive/pb";
+
+message CreatePostRequest{
+    string username = 1; 
+    string description = 2;
+    bool genai = 3;
+    int32 price = 4;
+}
+
+message CreatePostResponse{
+    Post post = 1;
+}
+
+
+

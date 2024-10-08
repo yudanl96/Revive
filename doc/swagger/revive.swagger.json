@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Revive API",
-    "version": "1.2",
+    "version": "1.3",
     "contact": {
       "name": "yudanl96",
       "url": "https://github.com/yudanl96/Revive"
@@ -20,6 +20,40 @@
     "application/json"
   ],
   "paths": {
+    "/v1/create_post": {
+      "post": {
+        "summary": "Create new post",
+        "description": "Use this API to create a new item post, takes username as input arg",
+        "operationId": "Revive_CreatePost",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbCreatePostResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbCreatePostRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Revive"
+        ]
+      }
+    },
     "/v1/create_user": {
       "post": {
         "summary": "Create new user",
@@ -158,6 +192,32 @@
     }
   },
   "definitions": {
+    "pbCreatePostRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "genai": {
+          "type": "boolean"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "pbCreatePostResponse": {
+      "type": "object",
+      "properties": {
+        "post": {
+          "$ref": "#/definitions/pbPost"
+        }
+      }
+    },
     "pbCreateUserRequest": {
       "type": "object",
       "properties": {
@@ -211,6 +271,37 @@
           "format": "date-time"
         },
         "refreshTokenExpiresTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "pbPost": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string",
+          "title": "1 is field number, identifier"
+        },
+        "description": {
+          "type": "string",
+          "title": "1-15 one bit"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "sold": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
           "type": "string",
           "format": "date-time"
         }

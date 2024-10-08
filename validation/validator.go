@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	isValidUsername = regexp.MustCompile("^[a-zA-Z0-9_]+$").MatchString
-	isValidPassword = regexp.MustCompile("^[a-zA-Z0-9_!@$%*&]+$").MatchString
+	isValidUsername    = regexp.MustCompile("^[a-zA-Z0-9_]+$").MatchString
+	isValidPassword    = regexp.MustCompile("^[a-zA-Z0-9_!@$%*&]+$").MatchString
+	isValidDescription = regexp.MustCompile("^[a-zA-Z0-9!,. ]+$").MatchString
 )
 
 func ValidateString(value string, minLength int, maxLength int) error {
@@ -45,6 +46,23 @@ func ValidateEmail(value string) error {
 	}
 	if _, err := mail.ParseAddress(value); err != nil {
 		return fmt.Errorf("not a valid email address")
+	}
+	return nil
+}
+
+func ValidateDescription(value string) error {
+	if err := ValidateString(value, 5, 250); err != nil {
+		return err
+	}
+	if !isValidDescription(value) {
+		return fmt.Errorf("must contain only letters, digit, space, or .,! characters")
+	}
+	return nil
+}
+
+func ValidatePrice(value int32) error {
+	if value < 0 {
+		return fmt.Errorf("price must be non-negative")
 	}
 	return nil
 }

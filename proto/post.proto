@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/yudanl96/revive/pb";
+
+message Post{
+    string id = 1;
+    string user_id = 2; //1 is field number, identifier
+    string description = 3; //1-15 one bit
+    int32 price = 4;
+    bool sold=5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+}
+

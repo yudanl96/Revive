@@ -14,3 +14,15 @@ func convertUser(user db.User) *pb.User {
 		CreatedAt: timestamppb.New(user.CreatedAt),
 	}
 }
+
+func convertPost(post db.Post) *pb.Post {
+	return &pb.Post{
+		Id:          post.ID,
+		UserId:      post.UserID,
+		Description: post.Description,
+		Price:       post.Price,
+		Sold:        post.Sold,
+		CreatedAt:   timestamppb.New(post.CreatedAt),
+		UpdatedAt:   timestamppb.New(post.UpdatedAt),
+	}
+}
