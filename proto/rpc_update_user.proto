@@ -8,8 +8,9 @@ option go_package = "github.com/yudanl96/revive/pb";
 
 message UpdateUserRequest{
     string username = 1; 
-    string email = 2; 
-    string password = 3;
+    optional string new_username = 2;
+    optional string email = 3; 
+    optional string password = 4;
 }
 
 message UpdateUserResponse{

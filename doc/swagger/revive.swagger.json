@@ -1,8 +1,12 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "rpc_create_user.proto",
-    "version": "version not set"
+    "title": "Revive API",
+    "version": "1.1",
+    "contact": {
+      "name": "yudanl96",
+      "url": "https://github.com/yudanl96/Revive"
+    }
   },
   "tags": [
     {
@@ -18,7 +22,8 @@
   "paths": {
     "/v1/create_user": {
       "post": {
-        "summary": "unary grpc",
+        "summary": "Create new user",
+        "description": "Use this API to create a new user",
         "operationId": "Revive_CreateUser",
         "responses": {
           "200": {
@@ -51,6 +56,8 @@
     },
     "/v1/login_user": {
       "post": {
+        "summary": "Login existing user",
+        "description": "Use this API to login an existing user",
         "operationId": "Revive_LoginUser",
         "responses": {
           "200": {
@@ -73,6 +80,40 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/pbLoginUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Revive"
+        ]
+      }
+    },
+    "/v1/update_user": {
+      "patch": {
+        "summary": "Update existing user",
+        "description": "Use this API to update an existing user",
+        "operationId": "Revive_UpdateUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbUpdateUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUpdateUserRequest"
             }
           }
         ],
@@ -138,6 +179,23 @@
         "refreshTokenExpiresTime": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "pbUpdateUserRequest": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "newUsername": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
         }
       }
     },

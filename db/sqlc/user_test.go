@@ -62,10 +62,19 @@ func TestGetUserById(t *testing.T) {
 func TestUpdateUser(t *testing.T) {
 	arg := CreateRandomUser(t)
 	arg_update := UpdateUserParams{
-		Username: util.RandomShortStr(),
-		Email:    util.RandomShortStr(),
-		Password: arg.Password,
-		ID:       arg.ID,
+		Username: sql.NullString{
+			String: util.RandomShortStr(),
+			Valid:  true,
+		},
+		Email: sql.NullString{
+			String: util.RandomShortStr(),
+			Valid:  true,
+		},
+		Password: sql.NullString{
+			String: util.RandomShortStr(),
+			Valid:  true,
+		},
+		ID: arg.ID,
 	}
 	err := testQueries.UpdateUser(context.Background(), arg_update)
 	require.NoError(t, err)

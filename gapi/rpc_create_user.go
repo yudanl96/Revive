@@ -8,11 +8,16 @@ import (
 	db "github.com/yudanl96/revive/db/sqlc"
 	"github.com/yudanl96/revive/pb"
 	"github.com/yudanl96/revive/util"
+	validate "github.com/yudanl96/revive/validation"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (server *Server) CreateUser(ctx context.Context, request *pb.CreateUserRequest) (response *pb.CreateUserResponse, err error) {
+	if violations := validateCreateUserRequest(request); violations != nil {
+		return nil, invalidArgumentError(violations)
+	}
 
 	hashPassword, err := util.HashPassword(request.GetPassword())
 	if err != nil {
@@ -46,4 +51,17 @@ func (server *Server) CreateUser(ctx context.Context, request *pb.CreateUserRequ
 		User: convertUser(user),
 	}
 	return res, nil
+}
+
+func validateCreateUserRequest(request *pb.CreateUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
+	if err := validate.ValidateUsername(request.GetUsername()); err != nil {
+		violations = append(violations, fieldViolation("username", err))
+	}
+	if err := validate.ValidatePassword(request.GetPassword()); err != nil {
+		violations = append(violations, fieldViolation("password", err))
+	}
+	if err := validate.ValidateEmail(request.GetEmail()); err != nil {
+		violations = append(violations, fieldViolation("email", err))
+	}
+	return violations
 }

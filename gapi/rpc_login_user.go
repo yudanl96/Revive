@@ -7,12 +7,18 @@ import (
 	"github.com/yudanl96/revive/pb"
 	"github.com/yudanl96/revive/redisdb"
 	"github.com/yudanl96/revive/util"
+	validate "github.com/yudanl96/revive/validation"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (server *Server) LoginUser(ctx context.Context, request *pb.LoginUserRequest) (response *pb.LoginUserResponse, err error) {
+	if violations := validateLoginUserRequest(request); violations != nil {
+		return nil, invalidArgumentError(violations)
+	}
+
 	id, err := server.store.RetrieveIdByUsername(ctx, request.Username)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -70,4 +76,14 @@ func (server *Server) LoginUser(ctx context.Context, request *pb.LoginUserReques
 	}
 
 	return res, nil
+}
+
+func validateLoginUserRequest(request *pb.LoginUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
+	if err := validate.ValidateUsername(request.GetUsername()); err != nil {
+		violations = append(violations, fieldViolation("username", err))
+	}
+	if err := validate.ValidatePassword(request.GetPassword()); err != nil {
+		violations = append(violations, fieldViolation("password", err))
+	}
+	return violations
 }

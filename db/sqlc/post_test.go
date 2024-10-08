@@ -49,10 +49,19 @@ func TestUpdatePost(t *testing.T) {
 	postArg, _ := CreateRandomPost(t)
 
 	postArgNew := UpdatePostParams{
-		ID:          postArg.ID,
-		Description: util.RandomLongStr(),
-		Sold:        true,
-		Price:       int32(util.RandomInt(0, 200)),
+		ID: postArg.ID,
+		Description: sql.NullString{
+			String: util.RandomShortStr(),
+			Valid:  true,
+		},
+		Sold: sql.NullBool{
+			Bool:  true,
+			Valid: true,
+		},
+		Price: sql.NullInt32{
+			Int32: int32(util.RandomInt(0, 200)),
+			Valid: true,
+		},
 	}
 
 	time.Sleep(10 * time.Second)

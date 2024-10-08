@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createPost = `-- name: CreatePost :exec
@@ -104,14 +105,18 @@ func (q *Queries) ListPosts(ctx context.Context, arg ListPostsParams) ([]Post, e
 }
 
 const updatePost = `-- name: UpdatePost :exec
-UPDATE posts SET description = ?, price = ?, sold = ?
+UPDATE posts 
+SET 
+    description = COALESCE(?, description), 
+    price = COALESCE(?, price), 
+    sold = COALESCE(?, sold)
 WHERE id=?
 `
 
 type UpdatePostParams struct {
-	Description string
-	Price       int32
-	Sold        bool
+	Description sql.NullString
+	Price       sql.NullInt32
+	Sold        sql.NullBool
 	ID          string
 }
 

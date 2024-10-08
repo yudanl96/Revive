@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :exec
@@ -124,14 +125,18 @@ func (q *Queries) RetrieveIdByUsername(ctx context.Context, username string) (st
 }
 
 const updateUser = `-- name: UpdateUser :exec
-UPDATE users SET username = ?, email = ?, password = ?
+UPDATE users 
+SET 
+    username = COALESCE(?,username), 
+    email = COALESCE(?, email), 
+    password = COALESCE(?, password)
 WHERE id=?
 `
 
 type UpdateUserParams struct {
-	Username string
-	Email    string
-	Password string
+	Username sql.NullString
+	Email    sql.NullString
+	Password sql.NullString
 	ID       string
 }
 

@@ -13,7 +13,11 @@ SELECT * FROM posts
 WHERE id = ? LIMIT 1;
 
 -- name: UpdatePost :exec
-UPDATE posts SET description = ?, price = ?, sold = ?
+UPDATE posts 
+SET 
+    description = COALESCE(sqlc.narg(description), description), 
+    price = COALESCE(sqlc.narg(price), price), 
+    sold = COALESCE(sqlc.narg(sold), sold)
 WHERE id=?;
 
 -- name: DeletePost :exec
