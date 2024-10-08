@@ -11,6 +11,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/redis/go-redis/v9"
+	"github.com/yudanl96/revive/chat"
 	db "github.com/yudanl96/revive/db/sqlc"
 	"github.com/yudanl96/revive/gapi"
 	"github.com/yudanl96/revive/pb"
@@ -45,8 +46,15 @@ func main() {
 
 	store := db.NewStore(connect)
 
-	go startGWServer(config, store, &r)
-	startGrpcServer(config, store, &r)
+	mux := http.NewServeMux()
+
+	newroom := chat.NewRoom()
+
+	go newroom.Run()
+	mux.Handle("/room", newroom)
+
+	go startGrpcServer(config, store, &r)
+	startGWServer(mux, config, store, &r)
 }
 
 func startRedisServer(config util.Config, wg *sync.WaitGroup) (*redis.Client, error) {
@@ -91,7 +99,7 @@ func startGrpcServer(config util.Config, store db.Store, r *redisdb.RedisRepo) {
 	}
 }
 
-func startGWServer(config util.Config, store db.Store, r *redisdb.RedisRepo) {
+func startGWServer(mux *http.ServeMux, config util.Config, store db.Store, r *redisdb.RedisRepo) {
 	server, err := gapi.NewServer(config, store, r)
 	if err != nil {
 		log.Fatal("Failed to create server: ", err)
@@ -108,7 +116,6 @@ func startGWServer(config util.Config, store db.Store, r *redisdb.RedisRepo) {
 		log.Fatal("Failed to register handler server: ", err)
 	}
 
-	mux := http.NewServeMux() //receive http requests from clients
 	mux.Handle("/", grpcMux)
 
 	listener, err := net.Listen("tcp", config.HTTPServerAddress)
