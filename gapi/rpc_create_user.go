@@ -47,6 +47,8 @@ func (server *Server) CreateUser(ctx context.Context, request *pb.CreateUserRequ
 		return nil, status.Errorf(codes.Internal, "fail to find the created user: %s", err)
 	}
 
+	// send a verification email to user here
+
 	res := &pb.CreateUserResponse{
 		User: convertUser(user),
 	}
