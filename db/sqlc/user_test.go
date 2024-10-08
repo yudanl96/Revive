@@ -80,9 +80,9 @@ func TestUpdateUser(t *testing.T) {
 	require.NoError(t, err)
 	user, err := testQueries.GetUserById(context.Background(), arg.ID)
 	require.NoError(t, err)
-	require.Equal(t, arg_update.Email, user.Email)
-	require.Equal(t, arg_update.Username, user.Username)
-	require.Equal(t, arg_update.Password, user.Password)
+	require.Equal(t, arg_update.Email.String, user.Email)
+	require.Equal(t, arg_update.Username.String, user.Username)
+	require.Equal(t, arg_update.Password.String, user.Password)
 }
 
 func TestDeleteUser(t *testing.T) {

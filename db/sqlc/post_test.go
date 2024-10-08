@@ -69,9 +69,9 @@ func TestUpdatePost(t *testing.T) {
 	require.NoError(t, err)
 	postNew, err := testQueries.GetPostById(context.Background(), postArgNew.ID)
 	require.NoError(t, err)
-	require.Equal(t, postNew.Sold, postArgNew.Sold)
-	require.Equal(t, postNew.Price, postArgNew.Price)
-	require.Equal(t, postNew.Description, postArgNew.Description)
+	require.Equal(t, postNew.Sold, postArgNew.Sold.Bool)
+	require.Equal(t, postNew.Price, postArgNew.Price.Int32)
+	require.Equal(t, postNew.Description, postArgNew.Description.String)
 
 }
 
