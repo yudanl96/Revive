@@ -22,6 +22,7 @@ const (
 	Revive_CreateUser_FullMethodName = "/pb.Revive/CreateUser"
 	Revive_LoginUser_FullMethodName  = "/pb.Revive/LoginUser"
 	Revive_UpdateUser_FullMethodName = "/pb.Revive/UpdateUser"
+	Revive_RenewToken_FullMethodName = "/pb.Revive/RenewToken"
 )
 
 // ReviveClient is the client API for Revive service.
@@ -32,6 +33,7 @@ type ReviveClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	LoginUser(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginUserResponse, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
+	RenewToken(ctx context.Context, in *RenewTokenRequest, opts ...grpc.CallOption) (*RenewTokenResponse, error)
 }
 
 type reviveClient struct {
@@ -72,6 +74,16 @@ func (c *reviveClient) UpdateUser(ctx context.Context, in *UpdateUserRequest, op
 	return out, nil
 }
 
+func (c *reviveClient) RenewToken(ctx context.Context, in *RenewTokenRequest, opts ...grpc.CallOption) (*RenewTokenResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RenewTokenResponse)
+	err := c.cc.Invoke(ctx, Revive_RenewToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ReviveServer is the server API for Revive service.
 // All implementations must embed UnimplementedReviveServer
 // for forward compatibility.
@@ -80,6 +92,7 @@ type ReviveServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	LoginUser(context.Context, *LoginUserRequest) (*LoginUserResponse, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
+	RenewToken(context.Context, *RenewTokenRequest) (*RenewTokenResponse, error)
 	mustEmbedUnimplementedReviveServer()
 }
 
@@ -98,6 +111,9 @@ func (UnimplementedReviveServer) LoginUser(context.Context, *LoginUserRequest) (
 }
 func (UnimplementedReviveServer) UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
+}
+func (UnimplementedReviveServer) RenewToken(context.Context, *RenewTokenRequest) (*RenewTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenewToken not implemented")
 }
 func (UnimplementedReviveServer) mustEmbedUnimplementedReviveServer() {}
 func (UnimplementedReviveServer) testEmbeddedByValue()                {}
@@ -174,6 +190,24 @@ func _Revive_UpdateUser_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Revive_RenewToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RenewTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReviveServer).RenewToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Revive_RenewToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReviveServer).RenewToken(ctx, req.(*RenewTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Revive_ServiceDesc is the grpc.ServiceDesc for Revive service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -192,6 +226,10 @@ var Revive_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUser",
 			Handler:    _Revive_UpdateUser_Handler,
+		},
+		{
+			MethodName: "RenewToken",
+			Handler:    _Revive_RenewToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

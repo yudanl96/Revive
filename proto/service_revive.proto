@@ -5,6 +5,7 @@ package pb;
 import "rpc_create_user.proto";
 import "rpc_update_user.proto";
 import "rpc_login_user.proto";
+import "rpc_renew_token.proto";
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
@@ -13,7 +14,7 @@ option go_package = "github.com/yudanl96/revive/pb";
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     info: {
         title: "Revive API";
-        version: "1.1";
+        version: "1.2";
         contact: {
             name: "yudanl96";
             url: "https://github.com/yudanl96/Revive";
@@ -51,6 +52,16 @@ service Revive{
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
             description: "Use this API to update an existing user";
             summary: "Update existing user"
+        };
+    }
+    rpc RenewToken (RenewTokenRequest) returns (RenewTokenResponse){
+        option (google.api.http) ={
+            post: "/v1/renew_token"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Use this API to renew access token";
+            summary: "Renew access token"
         };
     }
 }

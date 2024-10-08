@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Revive API",
-    "version": "1.1",
+    "version": "1.2",
     "contact": {
       "name": "yudanl96",
       "url": "https://github.com/yudanl96/Revive"
@@ -80,6 +80,40 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/pbLoginUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Revive"
+        ]
+      }
+    },
+    "/v1/renew_token": {
+      "post": {
+        "summary": "Renew access token",
+        "description": "Use this API to renew access token",
+        "operationId": "Revive_RenewToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbRenewTokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbRenewTokenRequest"
             }
           }
         ],
@@ -177,6 +211,34 @@
           "format": "date-time"
         },
         "refreshTokenExpiresTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "pbRenewTokenRequest": {
+      "type": "object",
+      "properties": {
+        "refreshToken": {
+          "type": "string"
+        }
+      }
+    },
+    "pbRenewTokenResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "$ref": "#/definitions/pbToken"
+        }
+      }
+    },
+    "pbToken": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "tokenExpiresTime": {
           "type": "string",
           "format": "date-time"
         }

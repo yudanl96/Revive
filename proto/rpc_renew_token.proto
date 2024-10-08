@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pb;
+
+import "token.proto";
+
+option go_package = "github.com/yudanl96/revive/pb";
+
+message RenewTokenRequest{
+    string refresh_token = 1;
+}
+
+message RenewTokenResponse{
+    Token token = 1;
+}
+
+
+

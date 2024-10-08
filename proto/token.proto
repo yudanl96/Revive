@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/yudanl96/revive/pb";
+
+message Token{
+    string token = 1;
+    google.protobuf.Timestamp token_expires_time = 2;
+}
+
