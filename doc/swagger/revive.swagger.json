@@ -20,10 +20,10 @@
     "application/json"
   ],
   "paths": {
-    "/v1/create_post": {
+    "/v1/post": {
       "post": {
         "summary": "Create new post",
-        "description": "Use this API to create a new item post, takes username as input arg",
+        "description": "Use this API to create a new item post, takes username as input arg, pass in \"genai\": true to enable GenAI created content",
         "operationId": "Revive_CreatePost",
         "responses": {
           "200": {
@@ -46,74 +46,6 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/pbCreatePostRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Revive"
-        ]
-      }
-    },
-    "/v1/create_user": {
-      "post": {
-        "summary": "Create new user",
-        "description": "Use this API to create a new user",
-        "operationId": "Revive_CreateUser",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/pbCreateUserResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/pbCreateUserRequest"
-            }
-          }
-        ],
-        "tags": [
-          "Revive"
-        ]
-      }
-    },
-    "/v1/login_user": {
-      "post": {
-        "summary": "Login existing user",
-        "description": "Use this API to login an existing user",
-        "operationId": "Revive_LoginUser",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/pbLoginUserResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/pbLoginUserRequest"
             }
           }
         ],
@@ -156,7 +88,111 @@
         ]
       }
     },
-    "/v1/update_user": {
+    "/v1/user": {
+      "post": {
+        "summary": "Create new user",
+        "description": "Use this API to create a new user",
+        "operationId": "Revive_CreateUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbCreateUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbCreateUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Revive"
+        ]
+      }
+    },
+    "/v1/user/login": {
+      "post": {
+        "summary": "Login existing user",
+        "description": "Use this API to login an existing user",
+        "operationId": "Revive_LoginUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbLoginUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbLoginUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Revive"
+        ]
+      }
+    },
+    "/v1/user/{username}": {
+      "delete": {
+        "summary": "Delete existing user",
+        "description": "Use this API to delete an existing user",
+        "operationId": "Revive_DeleteUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbDeleteUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Revive"
+        ]
+      },
       "patch": {
         "summary": "Update existing user",
         "description": "Use this API to update an existing user",
@@ -177,11 +213,17 @@
         },
         "parameters": [
           {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/pbUpdateUserRequest"
+              "$ref": "#/definitions/ReviveUpdateUserBody"
             }
           }
         ],
@@ -192,6 +234,20 @@
     }
   },
   "definitions": {
+    "ReviveUpdateUserBody": {
+      "type": "object",
+      "properties": {
+        "newUsername": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
     "pbCreatePostRequest": {
       "type": "object",
       "properties": {
@@ -239,6 +295,9 @@
           "$ref": "#/definitions/pbUser"
         }
       }
+    },
+    "pbDeleteUserResponse": {
+      "type": "object"
     },
     "pbLoginUserRequest": {
       "type": "object",
@@ -332,23 +391,6 @@
         "tokenExpiresTime": {
           "type": "string",
           "format": "date-time"
-        }
-      }
-    },
-    "pbUpdateUserRequest": {
-      "type": "object",
-      "properties": {
-        "username": {
-          "type": "string"
-        },
-        "newUsername": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
         }
       }
     },

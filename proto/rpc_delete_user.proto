@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "github.com/yudanl96/revive/pb";
+
+message DeleteUserRequest{
+    string id = 1;
+    string username = 2;
+}
+
+message DeleteUserResponse{
+   
+}
+
+
+

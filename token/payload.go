@@ -10,6 +10,7 @@ import (
 // payload data for the token
 type Payload struct {
 	ID          uuid.UUID `json:"id"`
+	UserID      string    `json:"user_id"`
 	Username    string    `json:"username"`
 	IssuedTime  time.Time `json:"issued_time"`
 	ExpiredTime time.Time `json:"expired_time"`

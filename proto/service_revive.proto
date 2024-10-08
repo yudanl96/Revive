@@ -5,6 +5,7 @@ package pb;
 import "rpc_create_user.proto";
 import "rpc_update_user.proto";
 import "rpc_login_user.proto";
+import "rpc_delete_user.proto";
 import "rpc_renew_token.proto";
 import "rpc_create_post.proto";
 import "google/api/annotations.proto";
@@ -24,10 +25,9 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 
 service Revive{
-    //unary grpc
     rpc CreateUser (CreateUserRequest) returns (CreateUserResponse){
         option (google.api.http) ={
-            post: "/v1/create_user"
+            post: "/v1/user"
             body: "*"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -37,7 +37,7 @@ service Revive{
     }
     rpc LoginUser (LoginUserRequest) returns (LoginUserResponse){
         option (google.api.http) ={
-            post: "/v1/login_user"
+            post: "/v1/user/login"
             body: "*"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -47,12 +47,21 @@ service Revive{
     }
     rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse){
         option (google.api.http) ={
-            patch: "/v1/update_user"
+            patch: "/v1/user/{username}"
             body: "*"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
             description: "Use this API to update an existing user";
             summary: "Update existing user"
+        };
+    }
+    rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse){
+        option (google.api.http) ={
+            delete: "/v1/user/{username}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Use this API to delete an existing user";
+            summary: "Delete existing user"
         };
     }
     rpc RenewToken (RenewTokenRequest) returns (RenewTokenResponse){
@@ -67,11 +76,11 @@ service Revive{
     }
     rpc CreatePost (CreatePostRequest) returns (CreatePostResponse){
         option (google.api.http) ={
-            post: "/v1/create_post"
+            post: "/v1/post"
             body: "*"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            description: "Use this API to create a new item post, takes username as input arg";
+            description: "Use this API to create a new item post, takes username as input arg, pass in \"genai\": true to enable GenAI created content";
             summary: "Create new post"
         };
     }

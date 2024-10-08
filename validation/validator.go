@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/mail"
 	"regexp"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -63,6 +65,14 @@ func ValidateDescription(value string) error {
 func ValidatePrice(value int32) error {
 	if value < 0 {
 		return fmt.Errorf("price must be non-negative")
+	}
+	return nil
+}
+
+func ValidateUUID(value string) error {
+	_, err := uuid.Parse(value)
+	if err != nil {
+		return fmt.Errorf("not a valid uuid")
 	}
 	return nil
 }

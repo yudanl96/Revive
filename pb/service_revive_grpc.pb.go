@@ -22,6 +22,7 @@ const (
 	Revive_CreateUser_FullMethodName = "/pb.Revive/CreateUser"
 	Revive_LoginUser_FullMethodName  = "/pb.Revive/LoginUser"
 	Revive_UpdateUser_FullMethodName = "/pb.Revive/UpdateUser"
+	Revive_DeleteUser_FullMethodName = "/pb.Revive/DeleteUser"
 	Revive_RenewToken_FullMethodName = "/pb.Revive/RenewToken"
 	Revive_CreatePost_FullMethodName = "/pb.Revive/CreatePost"
 )
@@ -30,10 +31,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ReviveClient interface {
-	// unary grpc
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	LoginUser(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginUserResponse, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
+	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
 	RenewToken(ctx context.Context, in *RenewTokenRequest, opts ...grpc.CallOption) (*RenewTokenResponse, error)
 	CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*CreatePostResponse, error)
 }
@@ -76,6 +77,16 @@ func (c *reviveClient) UpdateUser(ctx context.Context, in *UpdateUserRequest, op
 	return out, nil
 }
 
+func (c *reviveClient) DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteUserResponse)
+	err := c.cc.Invoke(ctx, Revive_DeleteUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *reviveClient) RenewToken(ctx context.Context, in *RenewTokenRequest, opts ...grpc.CallOption) (*RenewTokenResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RenewTokenResponse)
@@ -100,10 +111,10 @@ func (c *reviveClient) CreatePost(ctx context.Context, in *CreatePostRequest, op
 // All implementations must embed UnimplementedReviveServer
 // for forward compatibility.
 type ReviveServer interface {
-	// unary grpc
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	LoginUser(context.Context, *LoginUserRequest) (*LoginUserResponse, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
+	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
 	RenewToken(context.Context, *RenewTokenRequest) (*RenewTokenResponse, error)
 	CreatePost(context.Context, *CreatePostRequest) (*CreatePostResponse, error)
 	mustEmbedUnimplementedReviveServer()
@@ -124,6 +135,9 @@ func (UnimplementedReviveServer) LoginUser(context.Context, *LoginUserRequest) (
 }
 func (UnimplementedReviveServer) UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
+}
+func (UnimplementedReviveServer) DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
 }
 func (UnimplementedReviveServer) RenewToken(context.Context, *RenewTokenRequest) (*RenewTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RenewToken not implemented")
@@ -206,6 +220,24 @@ func _Revive_UpdateUser_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Revive_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReviveServer).DeleteUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Revive_DeleteUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReviveServer).DeleteUser(ctx, req.(*DeleteUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Revive_RenewToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RenewTokenRequest)
 	if err := dec(in); err != nil {
@@ -260,6 +292,10 @@ var Revive_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUser",
 			Handler:    _Revive_UpdateUser_Handler,
+		},
+		{
+			MethodName: "DeleteUser",
+			Handler:    _Revive_DeleteUser_Handler,
 		},
 		{
 			MethodName: "RenewToken",
